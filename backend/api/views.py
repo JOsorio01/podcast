@@ -1,6 +1,9 @@
 from django.http import HttpResponse
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework import generics
 
 from api.models import Genre, Podcast
@@ -17,11 +20,39 @@ SOURCE_URL = 'https://rss.itunes.apple.com/api/v1/' \
 class PodcastTop20View(generics.ListAPIView):
     serializer_class = PodcastSerializer
     queryset = Podcast.objects.all()[0:20]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request):
         if '.json' in request.path:
             filename = 'top20.json'
             serializer = self.serializer_class(self.get_queryset(), many=True)
+            data = serializer.data
+            # To avoid return an OrderedDict output data is transformed from
+            # json.dumps(data) -> it transforms OrderedDict to json
+            response = HttpResponse(
+                json.dumps(data),
+                content_type='application/json; charset=UTF-8'
+            )
+            response['Content-Disposition'] = ('attachment; filename={0}'.format(filename))
+
+            return response
+        return super().get(request)
+
+
+class PodcastLast20View(generics.ListAPIView):
+    serializer_class = PodcastSerializer
+    queryset = Podcast.objects.all()
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        return list(reversed(self.queryset.all()))[0:20]
+
+    def get(self, request):
+        if '.json' in request.path:
+            filename = 'last20.json'
+            serializer = self.serializer_class(self.get_queryset()[:20], many=True)
             data = serializer.data
             # To avoid return an OrderedDict output data is transformed from
             # json.dumps(data) -> it transforms OrderedDict to json

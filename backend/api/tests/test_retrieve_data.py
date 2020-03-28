@@ -17,6 +17,8 @@ OLD_TOP_20_PODCAST = reverse('api:old_top20')
 PODCAST_URL = reverse('api:podcast-list')
 TOP_20_PODCAST_FILE = reverse('api:top20-file')
 TOP_20_PODCAST = reverse('api:top20')
+LAST_20_PODCAST_FILE = reverse('api:last20-file')
+LAST_20_PODCAST = reverse('api:last20')
 
 
 class RetrieveDataTest(TestCase):
@@ -53,6 +55,10 @@ class RetrieveDataTest(TestCase):
         self.assertEqual(request.status_code, status.HTTP_200_OK)
         # verify length is 20
         self.assertEqual(len(request.data), 20)
+        # Verify data includes only the top 20
+        request_ids = [d['id'] for d in request.data]
+        db_ids = [p.id for p in Podcast.objects.all()[0:20]]
+        self.assertListEqual(db_ids, request_ids)
 
     def test_retrieve_first_20_podcast_file(self):
         """Test that endpoint retrieves the top 20 podcast"""
@@ -67,6 +73,47 @@ class RetrieveDataTest(TestCase):
         # verify length is 20
         json_data = json.loads(request.content)
         self.assertEqual(len(json_data), 20)
+        # Verify data includes only the top 20
+        request_ids = [d['id'] for d in json_data]
+        db_ids = [p.id for p in Podcast.objects.all()[0:20]]
+        self.assertListEqual(db_ids, request_ids)
+
+    def test_retrieve_last_20_podcast(self):
+        """Test that endpoint retrieves the last 20 podcast"""
+        # Add more than 20 records
+        for i in range(4, 30):
+            Podcast.objects.create(
+                id=i, artist_name='artist', name='name', url='http://url.com'
+            )
+        request = self.client.get(LAST_20_PODCAST)
+        # verify HTTP 200 OK
+        self.assertEqual(request.status_code, status.HTTP_200_OK)
+        # verify length is 20
+        self.assertEqual(len(request.data), 20)
+        # Verify data includes only the top 20
+        request_ids = [d['id'] for d in request.data]
+        db_data = reversed(Podcast.objects.all())
+        db_ids = [p.id for p in list(db_data)[0:20]]
+        self.assertListEqual(db_ids, request_ids)
+
+    def test_retrieve_last_20_podcast_file(self):
+        """Test that endpoint retrieves the last 20 podcast"""
+        # Add more than 20 records
+        for i in range(4, 30):
+            Podcast.objects.create(
+                id=i, artist_name='artist', name='name', url='http://url.com'
+            )
+        request = self.client.get(LAST_20_PODCAST_FILE)
+        # verify HTTP 200 OK
+        self.assertEqual(request.status_code, status.HTTP_200_OK)
+        # verify length is 20
+        json_data = json.loads(request.content)
+        self.assertEqual(len(json_data), 20)
+        # Verify data includes only the top 20
+        request_ids = [d['id'] for d in json_data]
+        db_data = reversed(Podcast.objects.all())
+        db_ids = [p.id for p in list(db_data)[0:20]]
+        self.assertListEqual(db_ids, request_ids)
 
     # Here begin the old test
     def test_old_podcast_filter_data_by_name(self):
