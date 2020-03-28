@@ -2,6 +2,8 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
+from api.models import Genre, Podcast
+
 import requests
 import json
 
@@ -44,3 +46,26 @@ def first_20_podcast(request):
         response['Content-Disposition'] = 'attachment; filename="%s"' % 'top20podcast.json'
         return response
     return Response(data)
+
+
+@api_view(['GET'])
+def init_db(request):
+    """Execute only once for add records to database"""
+    data = get_podcast_data()
+    for result in data:
+        podcast_obj, created = Podcast.objects.get_or_create(
+            id=result.get('id', None),
+            artist_name=result.get('artistName', None),
+            release_date=result.get('releaseDate', ''),
+            name=result.get('name', None),
+            copyright=result.get('copyright', ''),
+            url=result.get('url', '')
+        )
+        for g in result['genres']:
+            genre, created = Genre.objects.get_or_create(
+                genre_id=g['genreId'],
+                name=g['name'],
+                url=g['url']
+            )
+            podcast_obj.genre.add(genre)
+    return Response({'data': 'listo'})

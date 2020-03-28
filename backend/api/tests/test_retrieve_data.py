@@ -1,25 +1,49 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.db.models import Q
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
+from api.models import Podcast
+
 import json
 
+OLD_PODCAST_URL = reverse('api:old_podcast')
+OLD_TOP_20_PODCAST_FILE = reverse('api:old_top20_file')
+OLD_TOP_20_PODCAST = reverse('api:old_top20')
 
-PODCAST_URL = reverse('api:podcast')
-TOP_20_PODCAST_FILE = reverse('api:top20_file')
-TOP_20_PODCAST = reverse('api:top20')
+# New urls
+PODCAST_URL = reverse('api:podcast-list')
+# TOP_20_PODCAST_FILE = reverse('api:top20_file')
+# TOP_20_PODCAST = reverse('api:top20')
 
 
 class RetrieveDataTest(TestCase):
 
     def setUp(self):
         self.client = APIClient()
+        self.podcast1 = Podcast.objects.create(
+            id=1, artist_name='dialy revs', name='name', url='http://url.com')
+        self.podcast2 = Podcast.objects.create(
+            id=2, artist_name='revs', name='dialy', url='http://url.com')
+        self.podcast3 = Podcast.objects.create(
+            id=3, artist_name='revs', name='name', url='http://url.com')
 
-    def test_podcast_filter_data_by_name(self):
+    def test_podcast_filter_data(self):
         """Test that podcast retrieve the filtered data by name"""
-        request = self.client.get(PODCAST_URL + '?name=daily')
+        request = self.client.get(PODCAST_URL + '?search=daily')
+        results = request.data
+        # Verify status 200
+        self.assertEqual(request.status_code, status.HTTP_200_OK)
+        filtered_data = Podcast.objects.filter(
+            Q(name__icontains='daily') | Q(artist_name__icontains='daily')
+        )
+        self.assertEqual(len(results), len(list(filtered_data)))
+
+    def test_old_podcast_filter_data_by_name(self):
+        """Test that podcast retrieve the filtered data by name"""
+        request = self.client.get(OLD_PODCAST_URL + '?name=daily')
         results = request.data
         # Verify status 200
         self.assertEqual(request.status_code, status.HTTP_200_OK)
@@ -29,9 +53,9 @@ class RetrieveDataTest(TestCase):
         )
         self.assertEqual(len(results), len(list(filtered_data)))
 
-    def test_podcast_filter_data_by_artist_name_same_url(self):
+    def test_old_podcast_filter_data_by_artist_name_same_url(self):
         """Test if the same endpoint can filter for artist name by other query param"""
-        request = self.client.get(PODCAST_URL + '?artist=npr')
+        request = self.client.get(OLD_PODCAST_URL + '?artist=npr')
         results = request.data
         # Verify status 200
         self.assertEqual(request.status_code, status.HTTP_200_OK)
@@ -41,18 +65,18 @@ class RetrieveDataTest(TestCase):
         )
         self.assertEqual(len(results), len(list(filtered_data)))
 
-    def test_retrieve_first_20_podcast_file(self):
+    def test_old_retrieve_first_20_podcast_file(self):
         """Test that endpoint retrieves the top 20 podcast"""
-        request = self.client.get(TOP_20_PODCAST_FILE)
+        request = self.client.get(OLD_TOP_20_PODCAST_FILE)
         # verify HTTP 200 OK
         self.assertEqual(request.status_code, status.HTTP_200_OK)
         # verify length is 20
         json_data = json.loads(request.content)
         self.assertEqual(len(json_data), 20)
 
-    def test_retrieve_first_20_podcast(self):
+    def test_old_retrieve_first_20_podcast(self):
         """Test that endpoint retrieves the top 20 podcast"""
-        request = self.client.get(TOP_20_PODCAST)
+        request = self.client.get(OLD_TOP_20_PODCAST)
         # verify HTTP 200 OK
         self.assertEqual(request.status_code, status.HTTP_200_OK)
         # verify length is 20
