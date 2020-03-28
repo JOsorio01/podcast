@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 28-03-2020 a las 18:59:05
+-- Tiempo de generación: 28-03-2020 a las 23:33:23
 -- Versión del servidor: 10.2.25-MariaDB
 -- Versión de PHP: 7.2.5
 
@@ -538,6 +538,25 @@ INSERT INTO `api_podcast_genres` (`id`, `podcast_id`, `genre_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `authtoken_token`
+--
+
+CREATE TABLE `authtoken_token` (
+  `key` varchar(40) NOT NULL,
+  `created` datetime(6) NOT NULL,
+  `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `authtoken_token`
+--
+
+INSERT INTO `authtoken_token` (`key`, `created`, `user_id`) VALUES
+('891345a5af203ae7513581e7d296a5d2fcd26338', '2020-03-28 23:18:33.077220', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `auth_group`
 --
 
@@ -607,7 +626,11 @@ INSERT INTO `auth_permission` (`id`, `name`, `content_type_id`, `codename`) VALU
 (29, 'Can add podcast', 8, 'add_podcast'),
 (30, 'Can change podcast', 8, 'change_podcast'),
 (31, 'Can delete podcast', 8, 'delete_podcast'),
-(32, 'Can view podcast', 8, 'view_podcast');
+(32, 'Can view podcast', 8, 'view_podcast'),
+(33, 'Can add Token', 9, 'add_token'),
+(34, 'Can change Token', 9, 'change_token'),
+(35, 'Can delete Token', 9, 'delete_token'),
+(36, 'Can view Token', 9, 'view_token');
 
 -- --------------------------------------------------------
 
@@ -628,6 +651,13 @@ CREATE TABLE `auth_user` (
   `is_active` tinyint(1) NOT NULL,
   `date_joined` datetime(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `auth_user`
+--
+
+INSERT INTO `auth_user` (`id`, `password`, `last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`) VALUES
+(1, 'pbkdf2_sha256$150000$m1XaqAOcG7VR$ruhinenhi2X7igDxlQD7TqyJRke2yVMfwupBICbawRg=', NULL, 0, 'usuario_prueba', '', '', '', 0, 1, '2020-03-28 23:18:07.299738');
 
 -- --------------------------------------------------------
 
@@ -693,6 +723,7 @@ INSERT INTO `django_content_type` (`id`, `app_label`, `model`) VALUES
 (3, 'auth', 'group'),
 (2, 'auth', 'permission'),
 (4, 'auth', 'user'),
+(9, 'authtoken', 'token'),
 (5, 'contenttypes', 'contenttype'),
 (6, 'sessions', 'session');
 
@@ -734,7 +765,9 @@ INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
 (18, 'api', '0001_initial', '2020-03-28 15:34:38.082218'),
 (19, 'api', '0002_auto_20200328_1556', '2020-03-28 15:57:07.691051'),
 (20, 'api', '0003_auto_20200328_1620', '2020-03-28 16:20:29.173092'),
-(21, 'api', '0004_auto_20200328_1743', '2020-03-28 17:45:15.023795');
+(21, 'api', '0004_auto_20200328_1743', '2020-03-28 17:45:15.023795'),
+(24, 'authtoken', '0001_initial', '2020-03-28 22:49:38.379049'),
+(25, 'authtoken', '0002_auto_20160226_1747', '2020-03-28 22:50:16.618986');
 
 -- --------------------------------------------------------
 
@@ -771,6 +804,13 @@ ALTER TABLE `api_podcast_genres`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `api_podcast_genre_podcast_id_genre_id_32a955c2_uniq` (`podcast_id`,`genre_id`),
   ADD KEY `api_podcast_genres_genre_id_410e5559_fk_api_genre_genre_id` (`genre_id`);
+
+--
+-- Indices de la tabla `authtoken_token`
+--
+ALTER TABLE `authtoken_token`
+  ADD PRIMARY KEY (`key`),
+  ADD UNIQUE KEY `user_id` (`user_id`);
 
 --
 -- Indices de la tabla `auth_group`
@@ -871,13 +911,13 @@ ALTER TABLE `auth_group_permissions`
 -- AUTO_INCREMENT de la tabla `auth_permission`
 --
 ALTER TABLE `auth_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT de la tabla `auth_user`
 --
 ALTER TABLE `auth_user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `auth_user_groups`
@@ -901,13 +941,13 @@ ALTER TABLE `django_admin_log`
 -- AUTO_INCREMENT de la tabla `django_content_type`
 --
 ALTER TABLE `django_content_type`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `django_migrations`
 --
 ALTER TABLE `django_migrations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- Restricciones para tablas volcadas
@@ -919,6 +959,12 @@ ALTER TABLE `django_migrations`
 ALTER TABLE `api_podcast_genres`
   ADD CONSTRAINT `api_podcast_genres_genre_id_410e5559_fk_api_genre_genre_id` FOREIGN KEY (`genre_id`) REFERENCES `api_genre` (`genre_id`),
   ADD CONSTRAINT `api_podcast_genres_podcast_id_c01a7a91_fk_api_podcast_id` FOREIGN KEY (`podcast_id`) REFERENCES `api_podcast` (`id`);
+
+--
+-- Filtros para la tabla `authtoken_token`
+--
+ALTER TABLE `authtoken_token`
+  ADD CONSTRAINT `authtoken_token_user_id_35299eff_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`);
 
 --
 -- Filtros para la tabla `auth_group_permissions`
