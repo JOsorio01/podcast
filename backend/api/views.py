@@ -1,8 +1,10 @@
 from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework import generics
 
 from api.models import Genre, Podcast
+from api.serializers import PodcastSerializer
 
 import requests
 import json
@@ -12,6 +14,28 @@ SOURCE_URL = 'https://rss.itunes.apple.com/api/v1/' \
              'us/podcasts/top-podcasts/all/100/explicit.json'
 
 
+class PodcastTop20View(generics.ListAPIView):
+    serializer_class = PodcastSerializer
+    queryset = Podcast.objects.all()[0:20]
+
+    def get(self, request):
+        if '.json' in request.path:
+            filename = 'top20.json'
+            serializer = self.serializer_class(self.get_queryset(), many=True)
+            data = serializer.data
+            # To avoid return an OrderedDict output data is transformed from
+            # json.dumps(data) -> it transforms OrderedDict to json
+            response = HttpResponse(
+                json.dumps(data),
+                content_type='application/json; charset=UTF-8'
+            )
+            response['Content-Disposition'] = ('attachment; filename={0}'.format(filename))
+
+            return response
+        return super().get(request)
+
+
+# Here begin the old urls
 def get_podcast_data():
     # Read data for manipulation
     data = requests.get(SOURCE_URL).json()

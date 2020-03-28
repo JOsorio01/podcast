@@ -14,5 +14,5 @@ class Podcast(models.Model):
     release_date = models.DateField(blank=True, null=True)
     name = models.CharField(max_length=250)
     copyright = models.TextField(blank=True, null=True)
-    genre = models.ManyToManyField(Genre, related_name='genres')
+    genres = models.ManyToManyField(Genre, related_name='genres')
     url = models.URLField()

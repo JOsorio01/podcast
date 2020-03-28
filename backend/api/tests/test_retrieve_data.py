@@ -15,8 +15,8 @@ OLD_TOP_20_PODCAST = reverse('api:old_top20')
 
 # New urls
 PODCAST_URL = reverse('api:podcast-list')
-# TOP_20_PODCAST_FILE = reverse('api:top20_file')
-# TOP_20_PODCAST = reverse('api:top20')
+TOP_20_PODCAST_FILE = reverse('api:top20-file')
+TOP_20_PODCAST = reverse('api:top20')
 
 
 class RetrieveDataTest(TestCase):
@@ -41,6 +41,34 @@ class RetrieveDataTest(TestCase):
         )
         self.assertEqual(len(results), len(list(filtered_data)))
 
+    def test_retrieve_first_20_podcast(self):
+        """Test that endpoint retrieves the top 20 podcast"""
+        # Add more than 20 records
+        for i in range(4, 30):
+            Podcast.objects.create(
+                id=i, artist_name='artist', name='name', url='http://url.com'
+            )
+        request = self.client.get(TOP_20_PODCAST)
+        # verify HTTP 200 OK
+        self.assertEqual(request.status_code, status.HTTP_200_OK)
+        # verify length is 20
+        self.assertEqual(len(request.data), 20)
+
+    def test_retrieve_first_20_podcast_file(self):
+        """Test that endpoint retrieves the top 20 podcast"""
+        # Add more than 20 records
+        for i in range(4, 30):
+            Podcast.objects.create(
+                id=i, artist_name='artist', name='name', url='http://url.com'
+            )
+        request = self.client.get(TOP_20_PODCAST_FILE)
+        # verify HTTP 200 OK
+        self.assertEqual(request.status_code, status.HTTP_200_OK)
+        # verify length is 20
+        json_data = json.loads(request.content)
+        self.assertEqual(len(json_data), 20)
+
+    # Here begin the old test
     def test_old_podcast_filter_data_by_name(self):
         """Test that podcast retrieve the filtered data by name"""
         request = self.client.get(OLD_PODCAST_URL + '?name=daily')
