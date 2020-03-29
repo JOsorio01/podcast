@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'wx*s#$nz9fxn$gpy-66*4u%e&j8q=9k_9clsabx)_d--!*a@8d'
+SECRET_KEY = os.environ.get('DJANGO_KEY', 'wx*s#$nz9fxn$gpy-66*4u%e&j8q=9k_9clsabx)_d--!*a@8d')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -81,11 +84,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'podcast',
-            'USER': 'root',
-            'PASSWORD': 'mysql2018',
-            'HOST': 'localhost',
-            'PORT': '3306',
+            'NAME': os.environ.get('DB_NAME', 'db_name'),
+            'USER': os.environ.get('DB_USER', 'db_user'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'secret'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '3306'),
     },
 }
 
