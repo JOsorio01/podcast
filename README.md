@@ -18,11 +18,11 @@ The authentication was made with the django-rest-framework ‘authtoken’ libra
 * Python or Anaconda virtual environment with pip
 ### Project structure:
 ```
-__podcast/__
-+-- __backend/__
-|  +-- __api/__ (main app)
-|  +-- __backend/__ (configurations)
-|  +-- __user/__ (authentication app)
+podcast/
++-- backend/
+|  +-- api/ (main app)
+|  +-- backend/ (configurations)
+|  +-- user/ (authentication app)
 |  +-- .env.example (example for .env file)
 |  +-- .flake8 (flake8 configuration)
 |  +-- manage.py (command-line django interaction)
